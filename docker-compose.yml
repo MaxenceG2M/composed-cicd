@@ -1,0 +1,98 @@
+version: '3.6'
+
+services:
+  gitea:
+    container_name: gitea
+    image: gitea/gitea
+    restart: unless-stopped
+    environment:
+      # https://docs.gitea.io/en-us/install-with-docker/#environments-variables
+      - RUN_MODE=prod
+    ports:
+      - "10050:3000"
+      - "10022:22"
+    networks:
+      - cicd_net
+    volumes:
+      - ./gitea:/data
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    volumes:
+      - ./minio:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    entrypoint: sh
+    command: -c 'mkdir -p /data/drone && minio server /data --console-address ":9001"'
+    networks:
+      - cicd_net
+
+  drone:
+    container_name: drone
+    image: drone/drone:2.8.0
+    restart: unless-stopped
+    depends_on:
+      - gitea
+    environment:
+      - DRONE_GITEA_SERVER=http://edelweiss:10050/
+      - DRONE_RPC_SECRET=34618ee909cb804b2d059fa1b3905cf5
+        #      - DRONE_RUNNER_CAPACITY=2
+      - DRONE_SERVER_PROTO=http
+      - DRONE_SERVER_HOST=edelweiss:8085
+      - DRONE_NETWORK=cicd_net
+      - DRONE_RUNNER_NETWORKS=cicd_net
+      - DRONE_LOGS_DEBUG=true
+      - DRONE_LOGS_TEXT=true
+      - DRONE_LOGS_PRETTY=true
+      - DRONE_LOGS_COLOR=true
+      - DRONE_S3_ENDPOINT=http://minio:9000
+      - DRONE_S3_BUCKET=drone
+      - DRONE_S3_SKIP_VERIFY=true
+      - DRONE_S3_PATH_STYLE=true
+      - AWS_ACCESS_KEY_ID=drone
+      - AWS_SECRET_ACCESS_KEY=drone-secret
+        #- AWS_ACCESS_KEY_ID=drone
+        #- AWS_SECRET_ACCESS_KEY=34618ee909cb804b2d059fa1b3905cf5
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_REGION=us-east-1
+      - DRONE_GITEA_CLIENT_ID=1c949a89-3376-43a2-b253-950e4594b335
+      - DRONE_GITEA_CLIENT_SECRET=HQYzuYU4MfpLYDili4z4HHdvhLyv0xQk4gVzn6nnKus0
+    ports:
+      - "8085:80"
+      - "9002:9000"
+    networks:
+      - cicd_net
+    volumes:
+      - ./drone:/data
+
+  drone-agent:
+    container_name: runner
+    image: drone/drone-runner-docker:1.8.0
+    restart: unless-stopped
+    depends_on:
+      - drone
+    environment:
+      - DRONE_RPC_PROTO=http
+      - DRONE_RPC_HOST=drone
+      - DRONE_RPC_SECRET=34618ee909cb804b2d059fa1b3905cf5
+      - DRONE_RUNNER_NAME=runners
+      - DRONE_RUNNER_CAPACITY=2
+      - DRONE_NETWORK=cicd_net
+      - DRONE_RUNNER_NETWORKS=cicd_net
+      - DRONE_LOGS_DEBUG=true
+      - DRONE_LOGS_TEXT=true
+      - DRONE_LOGS_PRETTY=true
+      - DRONE_LOGS_COLOR=true
+      - DRONE_LOGS_TRACE=true
+    ports:
+      - "3333:3000"
+    networks:
+      - cicd_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  cicd_net:
+    name: cicd_net
