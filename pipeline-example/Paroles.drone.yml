@@ -1,0 +1,21 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: latex build
+    image: blang/latex:ubuntu
+    commands:
+    - pdflatex Book.tex
+    - pdflatex Book.tex
+    - pdflatex Book.tex
+  - name: upload
+    image: plugins/s3
+    settings:
+      bucket: drone-deploy
+      access_key: minioadmin
+      secret_key: minioadmin
+      source: Book.pdf
+      target: /Book.${DRONE_BUILD_NUMBER}.pdf
+      path_style: true
+      endpoint: http://edelweiss:9000
