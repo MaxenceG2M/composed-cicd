@@ -59,7 +59,7 @@ services:
       - AWS_REGION=us-east-1
       - DRONE_GITEA_CLIENT_ID=1c949a89-3376-43a2-b253-950e4594b335
       - DRONE_GITEA_CLIENT_SECRET=HQYzuYU4MfpLYDili4z4HHdvhLyv0xQk4gVzn6nnKus0
-      - DRONE_USER_CREATE=username:maxenceg2m,admin:true
+      - DRONE_USER_CREATE=username:prometheus,machine:true,admin:true,token:34618ee909cb804b2d059fa1b3905cf5
     ports:
       - "8085:80"
       - "9002:9000"
@@ -107,6 +107,11 @@ services:
     - cadvisor
     networks:
       - cicd_net
+
+  node_exporter:
+    image: prom/node-exporter:v1.3.1
+    container_name: node_exporter
+    network_mode: "host"
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.39.3
