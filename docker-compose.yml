@@ -8,6 +8,7 @@ services:
     environment:
       # https://docs.gitea.io/en-us/install-with-docker/#environments-variables
       - RUN_MODE=prod
+      - GITEA__webhook__ALLOWED_HOST_LIST=dakota
     ports:
       - "10050:3000"
       - "10022:22"
