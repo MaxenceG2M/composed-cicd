@@ -33,6 +33,11 @@ services:
     command: -c 'minio server /data{1..4} --console-address ":9001"'
     networks:
       - cicd_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
 
   drone:
     container_name: drone
@@ -143,6 +148,21 @@ services:
     - ./grafana:/var/lib/grafana
     networks:
       - cicd_net
+
+  s3www:
+    image: y4m4/s3www:latest
+    container_name: s3www
+    command:
+      - "-endpoint=http://minio:9000"
+      - "-accessKey=webreader"
+      - "-secretKey=webreader-secret"
+      - "-bucket=public"
+      - "-address=0.0.0.0:8080"
+    restart: unless-stopped
+    networks:
+      - cicd_net
+    ports:
+     - "80:8080"
 
 networks:
   cicd_net:
