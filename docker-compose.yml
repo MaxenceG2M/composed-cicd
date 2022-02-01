@@ -9,6 +9,7 @@ services:
       # https://docs.gitea.io/en-us/install-with-docker/#environments-variables
       - RUN_MODE=prod
       - GITEA__webhook__ALLOWED_HOST_LIST=dakota
+      - GITEA__metrics__ENABLED=true
     ports:
       - "10050:3000"
       - "10022:22"
@@ -21,12 +22,15 @@ services:
     image: minio/minio
     container_name: minio
     volumes:
-      - ./minio:/data
+      - ./minio/data1:/data1
+      - ./minio/data2:/data2
+      - ./minio/data3:/data3
+      - ./minio/data4:/data4
     ports:
       - "9000:9000"
       - "9001:9001"
     entrypoint: sh
-    command: -c 'mkdir -p /data/drone && minio server /data --console-address ":9001"'
+    command: -c 'minio server /data{1..4} --console-address ":9001"'
     networks:
       - cicd_net
 
@@ -37,11 +41,11 @@ services:
     depends_on:
       - gitea
     environment:
-      - DRONE_GITEA_SERVER=http://edelweiss:10050/
+      - DRONE_GITEA_SERVER=http://dakota:10050/
       - DRONE_RPC_SECRET=34618ee909cb804b2d059fa1b3905cf5
-        #      - DRONE_RUNNER_CAPACITY=2
+      - DRONE_RUNNER_CAPACITY=4
       - DRONE_SERVER_PROTO=http
-      - DRONE_SERVER_HOST=edelweiss:8085
+      - DRONE_SERVER_HOST=dakota:8085
       - DRONE_NETWORK=cicd_net
       - DRONE_RUNNER_NETWORKS=cicd_net
       - DRONE_LOGS_DEBUG=true
@@ -58,8 +62,8 @@ services:
         #- AWS_SECRET_ACCESS_KEY=34618ee909cb804b2d059fa1b3905cf5
       - AWS_DEFAULT_REGION=us-east-1
       - AWS_REGION=us-east-1
-      - DRONE_GITEA_CLIENT_ID=1c949a89-3376-43a2-b253-950e4594b335
-      - DRONE_GITEA_CLIENT_SECRET=HQYzuYU4MfpLYDili4z4HHdvhLyv0xQk4gVzn6nnKus0
+      - DRONE_GITEA_CLIENT_ID=9cf36c29-6b9b-4f73-9a29-f0139498714b
+      - DRONE_GITEA_CLIENT_SECRET=mN87880GlWJBw2vEP6bXunOZj80lXXrp4xcHx3edsKXy
       - DRONE_USER_CREATE=username:prometheus,machine:true,admin:true,token:34618ee909cb804b2d059fa1b3905cf5
     ports:
       - "8085:80"
