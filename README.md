@@ -15,6 +15,7 @@ Just change hostname `edelweiss` to your hostname and run `docker-compose up -d`
         - Change "SSH Server Port" to 10022
         - DON'T change "Gitea HTTP Listen Port"
         - Change "Gitea Base URL" to complete address: http://<hostname>:10050
+            - Traefik: http://gitea.dakota.eu
         - DON'T FORGET to create admin user
         - Install <3
             - After install, a short redirection will fail. But after some seconds it will go on Gitea
@@ -24,6 +25,7 @@ Just change hostname `edelweiss` to your hostname and run `docker-compose up -d`
             - ==> Create a new OAuth2 Application
             - Application name: drone
             - Redirection: http://<hostname>:8085/login
+                - Traefik: http://drone.<hostname>.eu/login
         - Keep client ID and Client secret, update docker-compose with this information.
         - Save, and update stack with `docker-compose up -d`
 - Drone: http://localhost:8085

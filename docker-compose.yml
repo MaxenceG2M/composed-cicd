@@ -11,12 +11,17 @@ services:
       - GITEA__webhook__ALLOWED_HOST_LIST=dakota
       - GITEA__metrics__ENABLED=true
     ports:
-      - "10050:3000"
       - "10022:22"
     networks:
       - cicd_net
     volumes:
       - ./gitea:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gitea.rule=Host(`gitea.dakota.eu`)"
+      - "traefik.http.routers.gitea.entrypoints=web"
+      - "traefik.http.routers.gitea.service=gitea"
+      - "traefik.http.services.gitea.loadbalancer.server.port=3000"
 
   minio:
     image: minio/minio
@@ -26,9 +31,6 @@ services:
       - ./minio/data2:/data2
       - ./minio/data3:/data3
       - ./minio/data4:/data4
-    ports:
-      - "9000:9000"
-      - "9001:9001"
     entrypoint: sh
     command: -c 'minio server /data{1..4} --console-address ":9001"'
     networks:
@@ -38,6 +40,14 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.service=minio"
+      - "traefik.http.routers.minio.rule=Host(`s3.dakota.eu`)"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
+      - "traefik.http.routers.minio-console.service=minio-console"
+      - "traefik.http.routers.minio-console.rule=Host(`minio.dakota.eu`)"
+      - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
 
   drone:
     container_name: drone
@@ -46,7 +56,7 @@ services:
     depends_on:
       - gitea
     environment:
-      - DRONE_GITEA_SERVER=http://dakota:10050/
+      - DRONE_GITEA_SERVER=http://gitea.dakota.eu/
       - DRONE_RPC_SECRET=34618ee909cb804b2d059fa1b3905cf5
       - DRONE_RUNNER_CAPACITY=4
       - DRONE_SERVER_PROTO=http
@@ -70,16 +80,17 @@ services:
       - DRONE_GITEA_CLIENT_ID=9cf36c29-6b9b-4f73-9a29-f0139498714b
       - DRONE_GITEA_CLIENT_SECRET=mN87880GlWJBw2vEP6bXunOZj80lXXrp4xcHx3edsKXy
       - DRONE_USER_CREATE=username:prometheus,machine:true,admin:true,token:34618ee909cb804b2d059fa1b3905cf5
-    ports:
-      - "8085:80"
-      - "9002:9000"
     networks:
       - cicd_net
     volumes:
       - ./drone:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.drone.rule=Host(`drone.dakota.eu`)"
+      - "traefik.http.routers.drone.entrypoints=web"
 
   drone-agent:
-    container_name: runner
+    container_name: drone_runner
     image: drone/drone-runner-docker:1.8.0
     restart: unless-stopped
     depends_on:
@@ -97,8 +108,6 @@ services:
       - DRONE_LOGS_PRETTY=true
       - DRONE_LOGS_COLOR=true
       - DRONE_LOGS_TRACE=true
-    ports:
-      - "3333:3000"
     networks:
       - cicd_net
     volumes:
@@ -107,8 +116,6 @@ services:
   prometheus:
     image: prom/prometheus:v2.32.1
     container_name: prometheus
-    ports:
-    - 9090:9090
     command:
     - --config.file=/etc/prometheus/prometheus.yml
     volumes:
@@ -117,17 +124,20 @@ services:
     - cadvisor
     networks:
       - cicd_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prom.dakota.eu`)"
+      - "traefik.http.routers.prometheus.entrypoints=web"
 
   node_exporter:
     image: prom/node-exporter:v1.3.1
     container_name: node_exporter
-    network_mode: "host"
+    networks:
+      - cicd_net
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.39.3
     container_name: cadvisor
-    ports:
-    - 9202:8080
     volumes:
     - /:/rootfs:ro
     - /var/run:/var/run:ro
@@ -142,12 +152,14 @@ services:
     image: grafana/grafana-enterprise:8.3.3
     container_name: grafana
     user: "1000"
-    ports:
-    - 3000:3000
     volumes:
     - ./grafana:/var/lib/grafana
     networks:
       - cicd_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.dakota.eu`) || Host(`dashboard.dakota.eu`)"
+      - "traefik.http.routers.grafana.entrypoints=web"
 
   s3www:
     image: y4m4/s3www:latest
@@ -161,8 +173,37 @@ services:
     restart: unless-stopped
     networks:
       - cicd_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.www.rule=Host(`dakota.eu`)"
+      - "traefik.http.routers.www.entrypoints=web"
+
+  proxy:
+    image: traefik
+    container_name: "traefik"
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--log.level=DEBUG"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--accesslog=true"
+    restart: unless-stopped
+    networks:
+      - cicd_net
     ports:
-     - "80:8080"
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.dakota.eu`)" # Change this to your domain
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
 
 networks:
   cicd_net:

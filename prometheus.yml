@@ -32,7 +32,7 @@ scrape_configs:
   - job_name: "node"
     scrape_interval: 15s
     static_configs:
-      - targets: ["dakota:9100"]
+      - targets: ["node_exporter:9100"]
 
   - job_name: "cadvisor"
     scrape_interval: 15s
@@ -43,7 +43,7 @@ scrape_configs:
     bearer_token: 34618ee909cb804b2d059fa1b3905cf5
     scrape_interval: 10s
     static_configs:
-      - targets: ["dakota:8085"] # Why run with docker name for cadvisor and not for drone?
+      - targets: ["drone:80"] # Why run with docker name for cadvisor and not for drone?
 
   - job_name: minio
     bearer_token: eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjQ3OTY3NDQ4NTYsImlzcyI6InByb21ldGhldXMiLCJzdWIiOiJtaW5pb2FkbWluIn0.TEmFasDZ8ptYxXSma4TRAP640FRaHHJx0eBXA6QGQRt9TUGIVOIFw18jr9o7JZvf-Dk86sYeGPd5_HdZuKNRJA
@@ -55,4 +55,4 @@ scrape_configs:
   - job_name: "gitea"
     scrape_interval: 15s
     static_configs:
-      - targets: ["dakota:10050"]
+      - targets: ["gitea:3000"]
