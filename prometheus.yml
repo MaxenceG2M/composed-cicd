@@ -56,3 +56,9 @@ scrape_configs:
     scrape_interval: 15s
     static_configs:
       - targets: ["gitea:3000"]
+
+  - job_name: "traefik"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["proxy:8080"]
+

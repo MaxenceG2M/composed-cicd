@@ -8,7 +8,7 @@ services:
     environment:
       # https://docs.gitea.io/en-us/install-with-docker/#environments-variables
       - RUN_MODE=prod
-      - GITEA__webhook__ALLOWED_HOST_LIST=dakota
+      - GITEA__webhook__ALLOWED_HOST_LIST=drone.dakota.eu
       - GITEA__metrics__ENABLED=true
     ports:
       - "10022:22"
@@ -60,7 +60,7 @@ services:
       - DRONE_RPC_SECRET=34618ee909cb804b2d059fa1b3905cf5
       - DRONE_RUNNER_CAPACITY=4
       - DRONE_SERVER_PROTO=http
-      - DRONE_SERVER_HOST=dakota:8085
+      - DRONE_SERVER_HOST=drone.dakota.eu
       - DRONE_NETWORK=cicd_net
       - DRONE_RUNNER_NETWORKS=cicd_net
       - DRONE_LOGS_DEBUG=true
@@ -77,8 +77,8 @@ services:
         #- AWS_SECRET_ACCESS_KEY=34618ee909cb804b2d059fa1b3905cf5
       - AWS_DEFAULT_REGION=us-east-1
       - AWS_REGION=us-east-1
-      - DRONE_GITEA_CLIENT_ID=9cf36c29-6b9b-4f73-9a29-f0139498714b
-      - DRONE_GITEA_CLIENT_SECRET=mN87880GlWJBw2vEP6bXunOZj80lXXrp4xcHx3edsKXy
+      - DRONE_GITEA_CLIENT_ID=fd4d40af-56d6-4123-8e80-f881f650bfd2
+      - DRONE_GITEA_CLIENT_SECRET=TE68ogLDFLE4tJ9LXCt1NcMjD80nZYVrvWVMzVXYj1hE
       - DRONE_USER_CREATE=username:prometheus,machine:true,admin:true,token:34618ee909cb804b2d059fa1b3905cf5
     networks:
       - cicd_net
@@ -189,6 +189,8 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--accesslog=true"
+      - "--metrics"
+      - "--metrics.prometheus.buckets=0.1,0.3,1.2,5.0"
     restart: unless-stopped
     networks:
       - cicd_net
