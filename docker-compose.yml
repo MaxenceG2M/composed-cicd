@@ -77,8 +77,8 @@ services:
         #- AWS_SECRET_ACCESS_KEY=34618ee909cb804b2d059fa1b3905cf5
       - AWS_DEFAULT_REGION=us-east-1
       - AWS_REGION=us-east-1
-      - DRONE_GITEA_CLIENT_ID=fd4d40af-56d6-4123-8e80-f881f650bfd2
-      - DRONE_GITEA_CLIENT_SECRET=TE68ogLDFLE4tJ9LXCt1NcMjD80nZYVrvWVMzVXYj1hE
+      - DRONE_GITEA_CLIENT_ID=${DRONE_GITEA_CLIENT_ID}
+      - DRONE_GITEA_CLIENT_SECRET=${DRONE_GITEA_CLIENT_SECRET}
       - DRONE_USER_CREATE=username:prometheus,machine:true,admin:true,token:34618ee909cb804b2d059fa1b3905cf5
     networks:
       - cicd_net
