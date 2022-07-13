@@ -66,3 +66,6 @@ Ensure that logs go to minio!
 To create gitea user: 
 
 `docker exec -ti --user git gitea gitea --config /data/gitea/conf/app.ini  admin user create --username maxenceg2m --password maxenceg2m --email maxence@g2m.com --admin`
+
+# DNS
+## TODO Rewrite README

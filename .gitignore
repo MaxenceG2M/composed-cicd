@@ -3,4 +3,9 @@ minio/
 gitea/
 .env
 
-gitea/gitea/home/.gitconfig
+dns-config/dns.config
+dns-config/log.config
+dns-config/logs
+dns-config/scopes
+dns-config/stats
+dns-config/zones/ntp.org.zone
