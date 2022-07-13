@@ -113,54 +113,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  prometheus:
-    image: prom/prometheus:v2.32.1
-    container_name: prometheus
-    command:
-    - --config.file=/etc/prometheus/prometheus.yml
-    volumes:
-    - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    depends_on:
-    - cadvisor
-    networks:
-      - cicd_net
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.prometheus.rule=Host(`prom.dakota.eu`)"
-      - "traefik.http.routers.prometheus.entrypoints=web"
-
-  node_exporter:
-    image: prom/node-exporter:v1.3.1
-    container_name: node_exporter
-    networks:
-      - cicd_net
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.39.3
-    container_name: cadvisor
-    volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:ro
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
-    - /dev/disk/:/dev/disk:ro
-    privileged: true
-    networks:
-      - cicd_net
-
-  grafana:
-    image: grafana/grafana-enterprise:8.3.3
-    container_name: grafana
-    user: "1000"
-    volumes:
-    - ./grafana:/var/lib/grafana
-    networks:
-      - cicd_net
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.grafana.rule=Host(`grafana.dakota.eu`) || Host(`dashboard.dakota.eu`)"
-      - "traefik.http.routers.grafana.entrypoints=web"
-
   s3www:
     image: y4m4/s3www:latest
     container_name: s3www

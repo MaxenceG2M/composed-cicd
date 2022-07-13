@@ -1,0 +1,8 @@
+
+drone/database.sqlite
+gitea/git/.ssh
+minio/data1/
+minio/data2/
+minio/data3/
+minio/data4/
+gitea/
