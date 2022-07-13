@@ -60,3 +60,9 @@ Sometime, first build will be a little difficulte to launch automatically. Don't
 
 # Minio logs
 Ensure that logs go to minio!
+
+# Use gitea conf ==> TODO Rewrite README
+# Create Gitea User
+To create gitea user: 
+
+`docker exec -ti --user git gitea gitea --config /data/gitea/conf/app.ini  admin user create --username maxenceg2m --password maxenceg2m --email maxence@g2m.com --admin`
