@@ -1,12 +1,48 @@
-# How to run
+# Why?
+
+I need / want a local CI/CD for my development that run on Docker and are little.
+
+I develop on a distant linux machine and I want to access to this CI/CD.
+
+I want to use some cool HTTP Address than IP:PORT.
+
+So I put a Traefik. And a DNS to resolve address.
+
+# How to run and install
+
+1. Start with a classic `docker-compose up -d`.
+2. Create Gitea user: 
+    * `docker exec -ti --user git gitea gitea --config /data/gitea/conf/app.ini  admin user create --username maxenceg2m --password maxenceg2m --email maxence@g2m.com --admin`
+    * Gitea start already setted (see `gitea/gitea/conf/app.ini` file)
+    * Remove this file and see "Old fashion way" to a manual install
+3. Login in Gitea, add an SSH key and create an OAuth2 Application for Drone
+    * Redirection: http://drone.dakota.eu/login
+
+And heu... Everything while be alright!
+
+# Access
+
+* Minio : `minioadmin / minioadmin`
+
+## DNS Error
+TCP Dial Error: reboot stack (`docker-compose down && docker-compose up -d`)
+
+## Why Technitium, an excellent but huge product?
+
+I redirect the DNS of my desktop on Tecnhitium.
+I do some test with dnsmasq, and it doesn't work after a while.
+I suspect limits that I explode very quickly, where Technitium does the job
+
+# Old fashion way
+## To start
 Just change hostname `edelweiss` to your hostname and run `docker-compose up -d`
 
-# When you change hostname, do:
+## When you change hostname, do:
 - Update prometheus targets configuration for drone job
 - Restart prometheus services: `docker-compose restart prometheus` if stack is already up
     - --> TODO Why target with servicename doesn't work?
 
-# The stack
+## The stack
 > :info: You can change `localhost` by your host name in this list
 
 - Gita: http://localhost:10050
@@ -47,25 +83,16 @@ Just change hostname `edelweiss` to your hostname and run `docker-compose up -d`
 - Prometheus: http://localhost:9090
     - Check all targets: http://localhost:9090/targets
 
-# Push in Gitea
+## Push in Gitea
 Add your SSH public key in Gitea account setting.
 Create a repo. Add the remote to your repository. Push on this remote.
 Drone should see it automatically. Enable build. Enjoy :)
 
-# Ensure webhook is activated
+## Ensure webhook is activated
 Go to your Gitea repository.
 Check settings -> Webhooks.
 You should see an entry to '<hostname>:8085'
 Sometime, first build will be a little difficulte to launch automatically. Don't hesitate to launch manually.
 
-# Minio logs
+## Minio logs
 Ensure that logs go to minio!
-
-# Use gitea conf ==> TODO Rewrite README
-# Create Gitea User
-To create gitea user: 
-
-`docker exec -ti --user git gitea gitea --config /data/gitea/conf/app.ini  admin user create --username maxenceg2m --password maxenceg2m --email maxence@g2m.com --admin`
-
-# DNS
-## TODO Rewrite README
