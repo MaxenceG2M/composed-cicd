@@ -8,7 +8,7 @@ services:
     # Use "host" network mode for DHCP deployments
     # network_mode: "host"
     ports:
-      - "5380:5380/tcp" #DNS web console
+      # - "5380:5380/tcp" #DNS web console
       - "53:53/udp" #DNS service
       - "53:53/tcp" #DNS service
       # - "67:67/udp" #DHCP service
@@ -35,6 +35,14 @@ services:
     restart: unless-stopped
     sysctls:
       - net.ipv4.ip_local_port_range=1024 65000
+    networks:
+      - cicd_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dns.rule=Host(`dns.dakota.eu`)"
+      - "traefik.http.routers.dns.entrypoints=web"
+      - "traefik.http.routers.dns.service=dns"
+      - "traefik.http.services.dns.loadbalancer.server.port=5380"
 
   gitea:
     container_name: gitea
