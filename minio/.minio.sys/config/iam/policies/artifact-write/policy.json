@@ -1,0 +1,1 @@
+{"Version":1,"Policy":{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:*"],"Resource":["arn:aws:s3:::artifact*"]}]},"CreateDate":"2022-07-15T00:48:56.008Z","UpdateDate":"2022-07-15T00:48:56.008Z"}
