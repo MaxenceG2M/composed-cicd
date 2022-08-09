@@ -8,7 +8,7 @@ services:
     # Use "host" network mode for DHCP deployments
     # network_mode: "host"
     ports:
-      # - "5380:5380/tcp" #DNS web console
+      - "5380:5380/tcp" #DNS web console
       - "53:53/udp" #DNS service
       - "53:53/tcp" #DNS service
       # - "67:67/udp" #DHCP service
