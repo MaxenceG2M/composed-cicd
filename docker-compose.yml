@@ -28,6 +28,7 @@ services:
     container_name: minio
     volumes:
       - ./minio:/data
+    user: ${UID}:${GID}
     entrypoint: sh
     command: -c 'minio server /data --console-address ":9001"'
     networks:
